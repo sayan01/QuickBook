@@ -1,3 +1,3 @@
 @echo off
-javac QuickBook.java
-java QuickBook
+javac QuickBook.java || pause
+java QuickBook || pause
