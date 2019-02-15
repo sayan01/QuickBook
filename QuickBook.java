@@ -5,33 +5,87 @@ import java.awt.*;
 class QuickBook{
 	static String[][] passenger_data;
 	static String[] receipt;
-	public static void main(String[] args) throws IOException{
-		Scanner sc = new Scanner(System.in);
-		if(args!= null && args.length>0 && args[0] .equalsIgnoreCase("test")){
-			System.out.println("Inside testing\n enter matrix data:");
-			System.out.print("Matrix X is fixed, (X = 4), Enter Y: ");
-			int y = new Integer(sc.nextLine());
-			passenger_data = new String[y][5];
-			System.out.print("Enter "+y+" data\n");
-			for(int i = 0; i<y;i++){
-				System.out.println("Y:"+i);
-				System.out.print("enter X0: ");
-				passenger_data[i][0] = sc.nextLine();
-				System.out.print("enter X1: ");
-				passenger_data[i][1] = sc.nextLine();
-				System.out.print("enter X2: ");
-				passenger_data[i][2] = sc.nextLine();
-				System.out.print("enter X3: ");
-				passenger_data[i][3] = sc.nextLine();
-			}
-			System.out.print("Print ? Y/N  ");
-			if(sc.next().trim().toUpperCase().charAt(0) == 'Y') PrintTicket.print();
+	public static void cancel()throws IOException{
+		File f = new File("data.txt");
+		if(!f.exists()){
+			System.out.print("We do not have any booking data. Sorry.");
 			System.exit(0);
 		}
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Please enter Transaction number: ");
+		String t = sc.nextLine();
+		if(t.length()!=16){
+			System.out.print("Transaction number is invalid!");
+			System.exit(1);
+		}
+		System.out.println("Please enter PNR number: ");
+		String p = sc.nextLine();
+		if(p.length()!=10){
+			System.out.print("PNR number is invalid!");
+			System.exit(1);
+		}
+		RandomAccessFile raf = new RandomAccessFile(f,"rw");
+		boolean found = false;
+		long prevFID = 0;
+		while(raf.getFilePointer() != raf.length()){
+			String line = raf.readLine();
+			String[] tokens = line.split("\t");
+			if(tokens[tokens.length-1].equals("CANCELLED")) {prevFID = raf.getFilePointer();continue;}
+			if(tokens[0].equals(t) && tokens[1].equals(p)){
+				found = true;
+				if(datePast(tokens[4])){
+					System.out.print("The ticket is of a past booking. Ticket cannot be cancelled.");
+					System.exit(0);
+				}
+				System.out.print("Record found, Are you sure you want to cancel booking? (Y/N) ");
+				if(sc.nextLine().trim().equalsIgnoreCase("N"))System.exit(-1);
+				String others = "";
+				while(raf.getFilePointer() != raf.length()){
+					others+= raf.readLine()+"\n";
+				}
+				raf.seek(prevFID);
+				raf.writeBytes(line + "\t"+"CANCELLED"+"\n"+others);
+				break;
+			}
+			prevFID = raf.getFilePointer();
+		}
+		if(!found){
+			System.out.println("No such record of train ticket is present.");
+		}
+		else{
+			System.out.println("Train Ticket cancelled successfully.");
+		}
+		System.exit(0);
+	}
+	public static boolean datePast(String cdf){
+		Calendar curr = Calendar.getInstance();
+		int yr = new Integer(cdf.substring(cdf.length()-4));
+		int mon = "JanFebMarAprMayJunJulAugSepOctNovDec".indexOf(cdf.substring(4,7))  /  3;
+		int date = new Integer(cdf.substring(8,10));
+		int hr = new Integer(cdf.substring(11,13));
+		int min = new Integer(cdf.substring(14,16));
+		Calendar rec = Calendar.getInstance();
+		rec.set(yr,mon,date,hr,min,0);
+		return rec.before(curr);
+
+	}
+	public static void main(String[] args) throws IOException{
+		Scanner sc = new Scanner(System.in);
 		String[] cities = loadCities();
 		System.out.println("\nQuickBook\n");
 		Calendar currentDate = Calendar.getInstance();
 		System.out.println("Current Time: "+ currentDate.getTime().toString());
+		System.out.println("What do you want to do?\n1.Book Tickets\n2.Cancel Tickets");
+		int book_or_can = new Integer(sc.nextLine());
+		if(book_or_can==2){
+			System.out.print("We are sorry to hear you have to cancel your booking.\n");
+			cancel();
+		}
+		else if(book_or_can!=1){
+			// datePast(Calendar.getInstance().getTime().toString());
+			System.out.println("Invalid choice!\nTerminating Program.");
+			System.exit(1);
+		}
 		System.out.print("Journey from (enter name of city): ");
 		String city_from = sc.nextLine().trim().toUpperCase();
 		System.out.print("Journey to (enter name of city): ");
@@ -56,15 +110,15 @@ class QuickBook{
 		String date_journey = sc.nextLine().trim();
 		Calendar journeyDate = Calendar.getInstance();
 
-			String[] timings = {"07:00","12:30","02:45","06:15","08:20","11:15"};
-			String[] tk = date_journey.split("[ ./]+");
-			int time = (int)(Math.random()*6);
-			int yr = new Integer(tk[2]);
-			int mn = new Integer(tk[1])-1;
-			int day = new Integer(tk[0]);
-			int hr = new Integer(timings[time].substring(0,2));
-			int min = new Integer(timings[time].substring(3,5));
-			journeyDate.set(yr,mn,day,hr,min,0);
+		String[] timings = {"07:00","12:30","02:45","06:15","08:20","11:15"};
+		String[] tk = date_journey.split("[ ./]+");
+		int time = (int)(Math.random()*6);
+		int yr = new Integer(tk[2]);
+		int mn = new Integer(tk[1])-1;
+		int day = new Integer(tk[0]);
+		int hr = new Integer(timings[time].substring(0,2));
+		int min = new Integer(timings[time].substring(3,5));
+		journeyDate.set(yr,mn,day,hr,min,0);
 
 		if(journeyDate.before(currentDate)){
 			System.out.print("Journey Date is in past.\nTerminating Program.");
@@ -72,15 +126,15 @@ class QuickBook{
 		}
 		String Class = ""; byte class_index;
 
-			String[] classes = {"Anubhuti Class (EA)","AC First Class (1A)","Exec. Chair Car (EC)","AC 2 Tier (2A)",
-			"First Class (FC)","AC 3 Tier (3A)","AC 3 Economy (3E)","AC Chair Car (CC)","Sleeper (SL)","Second Sitting (2S)"};
-			System.out.print("Choose Class: \n");
-			for(int i = 0; i < classes.length;i++){
-				System.out.println(i+1+". "+classes[i]);
-			}
-			class_index = sc.nextByte();
-			if(class_index>classes.length) System.exit(1);
-			Class = classes[class_index-1];
+		String[] classes = {"Anubhuti Class (EA)","AC First Class (1A)","Exec. Chair Car (EC)","AC 2 Tier (2A)",
+		"First Class (FC)","AC 3 Tier (3A)","AC 3 Economy (3E)","AC Chair Car (CC)","Sleeper (SL)","Second Sitting (2S)"};
+		System.out.print("Choose Class: \n");
+		for(int i = 0; i < classes.length;i++){
+			System.out.println(i+1+". "+classes[i]);
+		}
+		class_index = sc.nextByte();
+		if(class_index>classes.length) System.exit(1);
+		Class = classes[class_index-1];
 
 		System.out.print("Train found: \n");
 		int train_number = (int)(Math.random()*89999)+10000;
@@ -150,12 +204,8 @@ class QuickBook{
 		 	System.exit(0);
 		}
 		else{
-			System.out.print("Tickets have been booked.\nPrint Tickets? (Y/N) ");
-			if(sc.next().trim().toUpperCase().equalsIgnoreCase("N"))System.exit(0);
-			String transactionID = "";
-			for(int i = 0; i<16;i++)transactionID += ""+(int)(Math.random()*10);
-			String PNR="";
-			for(int i = 0; i<10;i++)PNR += ""+(int)(Math.random()*10);
+			String transactionID = createUnique("TRANS");
+			String PNR = createUnique("PNR");
 			receipt = new String[17];
 			receipt[0] = transactionID;
 			receipt[1] = PNR;
@@ -187,9 +237,71 @@ class QuickBook{
 				String berth = ber[seatNo%3];
 				passenger_data[i][4] = coach+ " "+ seatNo+ " " +berth;
 			}
-			PrintTicket.print();
-
+			writeData(receipt,passenger_data);
+			System.out.print("Tickets have been booked.\nPrint Tickets? (Y/N) ");
+			if(!sc.next().trim().toUpperCase().equalsIgnoreCase("N"))
+				PrintTicket.print();
 		}
+	}
+	private static String createUnique(String field) throws IOException{
+		if(field.equalsIgnoreCase("TRANS")){
+			String transactionID = "";
+			for(int i = 0; i<16;i++)transactionID += ""+(int)(Math.random()*10);
+			if(!unique(transactionID,"TRANS"))
+				return createUnique("TRANS");
+			else return transactionID;
+		}
+		else if(field.equalsIgnoreCase("PNR")){
+			String PNR = "";
+			for(int i = 0; i<10;i++)PNR += ""+(int)(Math.random()*10);
+			if(unique(PNR,"PNR"))
+				return PNR;
+			else return createUnique("PNR");
+		}
+		else return null;
+	}
+	private static boolean unique(String data,String field) throws IOException{
+		File f = new File("data.txt");
+		if(!f.exists()) return true;
+		RandomAccessFile raf = new RandomAccessFile(f,"r");
+		raf.seek(0);
+		boolean unique = true;
+		while(raf.getFilePointer() != raf.length()){
+			String line = raf.readLine();
+			String[] tokens = line.split("\t");
+			if(field.equalsIgnoreCase("TRANS")){
+				if(tokens[0].equals(data))
+					return false;
+			}
+			else if(field.equalsIgnoreCase("PNR")){
+				if(tokens[1].equals(data))
+					return false;
+			}
+		}
+		return true;
+	}
+	private static void writeData(String[] receipt, String[][] pada) throws IOException{
+		File f = new File("data.txt");
+		if(!f.exists()){
+			System.out.println("Database File is not present.\nMaking new file.");
+			if(!f.createNewFile()){
+				System.out.println("Could not create new file.\nTerminating Program.");
+			}
+			else{
+				System.out.println("New File made.");
+			}
+		}
+		RandomAccessFile raf = new RandomAccessFile(f,"rw");
+		raf.seek(raf.length());
+		for(String receipt_data:receipt){
+			raf.writeBytes(receipt_data+"\t");
+		}
+		for(String[] row:pada){
+			for(String data:row){
+				raf.writeBytes(data+"\t");
+			}
+		}
+		raf.writeBytes("\n");
 	}
 	private static String[] loadCities() throws IOException{
 		File f = new File("city.txt");
@@ -240,7 +352,7 @@ class PrintTicket
         String[] pada_labels = {"Name","Age","Gender","Food Choice","Coach/Seat/Berth"};
         int y = 150;
         g.setFont(new Font("Century Gothic",Font.PLAIN,25));
-        g.drawString("QuickBook - Book Railway Tickets at Ease",50,100);
+        g.drawString("QuickBook - Book Railway Tickets with Ease",50,100);
         String[][] pada = QuickBook.passenger_data;
         String[] receipt = QuickBook.receipt;
 
