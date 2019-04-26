@@ -59,11 +59,11 @@ class QuickBook{
 	}
 	public static boolean datePast(String cdf){
 		Calendar curr = Calendar.getInstance();
-		int yr = new Integer(cdf.substring(cdf.length()-4));
+		int yr = Integer.parseInt(cdf.substring(cdf.length()-4));
 		int mon = "JanFebMarAprMayJunJulAugSepOctNovDec".indexOf(cdf.substring(4,7))  /  3;
-		int date = new Integer(cdf.substring(8,10));
-		int hr = new Integer(cdf.substring(11,13));
-		int min = new Integer(cdf.substring(14,16));
+		int date = Integer.parseInt(cdf.substring(8,10));
+		int hr = Integer.parseInt(cdf.substring(11,13));
+		int min = Integer.parseInt(cdf.substring(14,16));
 		Calendar rec = Calendar.getInstance();
 		rec.set(yr,mon,date,hr,min,0);
 		return rec.before(curr);
@@ -76,7 +76,7 @@ class QuickBook{
 		Calendar currentDate = Calendar.getInstance();
 		System.out.println("Current Time: "+ currentDate.getTime().toString());
 		System.out.println("What do you want to do?\n1.Book Tickets\n2.Cancel Tickets");
-		int book_or_can = new Integer(sc.nextLine());
+		int book_or_can = Integer.parseInt(sc.nextLine());
 		if(book_or_can==2){
 			System.out.print("We are sorry to hear you have to cancel your booking.\n");
 			cancel();
@@ -113,11 +113,11 @@ class QuickBook{
 		String[] timings = {"07:00","12:30","02:45","06:15","08:20","11:15"};
 		String[] tk = date_journey.split("[ ./]+");
 		int time = (int)(Math.random()*6);
-		int yr = new Integer(tk[2]);
-		int mn = new Integer(tk[1])-1;
-		int day = new Integer(tk[0]);
-		int hr = new Integer(timings[time].substring(0,2));
-		int min = new Integer(timings[time].substring(3,5));
+		int yr = Integer.parseInt(tk[2]);
+		int mn = Integer.parseInt(tk[1])-1;
+		int day = Integer.parseInt(tk[0]);
+		int hr = Integer.parseInt(timings[time].substring(0,2));
+		int min = Integer.parseInt(timings[time].substring(3,5));
 		journeyDate.set(yr,mn,day,hr,min,0);
 
 		if(journeyDate.before(currentDate)){
@@ -163,7 +163,7 @@ class QuickBook{
 		int ticket_choice = sc.nextByte();
 		if(ticket_choice>2 || ticket_choice<1)System.exit(1);
 		System.out.print("How many tickets do you want to book? (max 10): ");
-		int no_of_passengers = new Integer(sc.next());
+		int no_of_passengers = Integer.parseInt(sc.next());
 		if(no_of_passengers<1 || no_of_passengers>10) System.exit(1);
 		System.out.println("Enter passenger Details: ");
 		passenger_data = new String[no_of_passengers][1+1+1+1+1];
@@ -175,8 +175,8 @@ class QuickBook{
 			passenger_data[i][0] = sc.nextLine();
 			System.out.print("Enter age: ");
 			passenger_data[i][1] = sc.nextLine();
-			if(new Integer(passenger_data[i][1]) < 1 || new Integer(passenger_data[i][1]) > 100) System.exit(1);
-			if (new Integer(passenger_data[i][1]) >=18) adult++;
+			if(Integer.parseInt(passenger_data[i][1]) < 1 || Integer.parseInt(passenger_data[i][1]) > 100) System.exit(1);
+			if (Integer.parseInt(passenger_data[i][1]) >=18) adult++;
 			System.out.print("Enter sex: (M/F)  ");
 			passenger_data[i][2] = sc.nextLine().toUpperCase();
 			if(!(passenger_data[i][2] .equals( "M" )|| passenger_data[i][2] .equals("F")) )System.exit(1);
