@@ -350,38 +350,38 @@ class PrintTicket
         g2d.translate(pf.getImageableX(), pf.getImageableY());
         String[] labels = {"Transaction ID: ","PNR No: ","Train Name: ","Train Number: ","Journey Date and Time: ","Class: ","Date of Booking: ","Distance: ","From: ","To: ","Arrival Time: ","Adult: ","Child: ","Quota: ","Phone Number: ","Address: ","Fare: "};
         String[] pada_labels = {"Name","Age","Gender","Food Choice","Coach/Seat/Berth"};
-        int y = 150;
-        g.setFont(new Font("Century Gothic",Font.PLAIN,25));
-        g.drawString("QuickBook - Book Railway Tickets with Ease",50,100);
+        int y = 120;
+        g.setFont(new Font("Century Gothic",Font.PLAIN,18));
+        g.drawString("QuickBook - Book Railway Tickets with Ease",20,80);
         String[][] pada = QuickBook.passenger_data;
         String[] receipt = QuickBook.receipt;
 
         for(int i = 0; i< 17;i++){
         	String label = labels[i];
         	String data = receipt[i];
-        	g.setFont(new Font("Arial",Font.BOLD,14));
+        	g.setFont(new Font("Arial",Font.BOLD,12));
         	g.drawString(label, 20, y);
-        	g.setFont(new Font("Consolas",Font.PLAIN,12));
-        	g.drawString(data,200, y);
+        	g.setFont(new Font("Consolas",Font.PLAIN,10));
+        	g.drawString(data,180, y);
         	y+=15;
         }
-        y+=25;
-        	g.setFont(new Font("Arial",Font.BOLD,20));
+        y+=20;
+        	g.setFont(new Font("Arial",Font.BOLD,15));
         	g.drawString("Passenger Details:", 20, y);
-        y+=25;
-        	g.setFont(new Font("Arial",Font.BOLD,14));
-        	g.drawString("Sn. No.", 30, y);
+        y+=20;
+        	g.setFont(new Font("Arial",Font.BOLD,12));
+        	g.drawString("Sn. No.", 20, y);
         for(int i = 0; i < 5;i++){
-        	g.setFont(new Font("Arial",Font.BOLD,14));
-        	g.drawString(pada_labels[i], (i+1)*90, y);
+        	g.setFont(new Font("Arial",Font.BOLD,12));
+        	g.drawString(pada_labels[i], (i+1)*80, y);
         }
         y+= 20;
         for(int i = 0;i<pada.length;i++){
-        	g.setFont(new Font("Arial",Font.PLAIN,12));
+        	g.setFont(new Font("Arial",Font.PLAIN,10));
         	g.drawString(""+(i+1), 30, y);
         	for(int j = 0; j<5;j++){
-	        	g.setFont(new Font("Arial",Font.PLAIN,12));
-	        	g.drawString(pada[i][j], (j+1)*90, y);
+	        	g.setFont(new Font("Arial",Font.PLAIN,10));
+	        	g.drawString(pada[i][j], (j+1)*80, y);
         	}
         	y+=20;
         }
